@@ -14,9 +14,6 @@ JMP = 0b01010100
 CMP = 0b10100111
 JEQ = 0b01010101
 JNE = 0b01010110
-
-print('argv',sys.argv)
-
 class CPU:
     """Main CPU class."""
 
@@ -26,7 +23,7 @@ class CPU:
         self.reg = [0] * 8
         self.pc = 0
         self.sp = 0
-        self.fl = 0b00000000
+        self.fl = 0
 
     def load(self, filename):
         """Load a program into memory."""
@@ -63,14 +60,14 @@ class CPU:
         #elif op == "SUB": etc
         elif op == 'CMP':
             # FL bits: 00000LGE
-            if reg_a == reg_b:
+            if self.reg[reg_a] == self.reg[reg_b]:
                 self.fl = 0b00000001
-            elif reg_a < reg_b:
+            elif self.reg[reg_a] < self.reg[reg_b]:
                 self.fl = 0b00000100
-            elif reg_a > reg_b:
+            elif self.reg[reg_a] > self.reg[reg_b]:
                 self.fl = 0b00000010
-            # else:
-            #     self.fl = 0b00000000
+            else:
+                self.fl = 0b00000000
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -133,21 +130,22 @@ class CPU:
                 self.pc = self.reg[operand_a]
             elif ir == RET:
                 self.pc = self.ram[self.sp]
-                self.sp += 1
+                # self.sp += 1
             elif ir == JMP:
                 self.pc = self.reg[operand_a]
-                self.pc += 2
             elif ir == CMP:
                 self.alu('CMP', operand_a, operand_b)
                 self.pc += 3
             elif ir == JEQ:
                 if self.fl == 0b00000001:
                     self.pc = self.reg[operand_a]
-                self.pc += 2
+                else:
+                    self.pc += 2
             elif ir == JNE:
-                if self.fl == 0b00000000:
+                if ((self.fl == 0b00000001) == 0):
                     self.pc = self.reg[operand_a]
-                self.pc += 2
+                else:
+                    self.pc += 2
             else:
                 print(f'Unknown command: {ir}')
                 sys.exit(1)
