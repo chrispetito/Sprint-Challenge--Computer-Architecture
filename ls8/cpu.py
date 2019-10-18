@@ -60,14 +60,15 @@ class CPU:
         #elif op == "SUB": etc
         elif op == 'CMP':
             # FL bits: 00000LGE
+            # If they are equal, set the Equal E flag to 1, otherwise set it to 0.
             if self.reg[reg_a] == self.reg[reg_b]:
                 self.fl = 0b00000001
+            # If registerA is less than registerB, set the Less-than L flag to 1, otherwise set it to 0.
             elif self.reg[reg_a] < self.reg[reg_b]:
                 self.fl = 0b00000100
+            # If registerA is greater than registerB, set the Greater-than G flag to 1, otherwise set it to 0.
             elif self.reg[reg_a] > self.reg[reg_b]:
                 self.fl = 0b00000010
-            else:
-                self.fl = 0b00000000
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -131,16 +132,19 @@ class CPU:
             elif ir == RET:
                 self.pc = self.ram[self.sp]
                 # self.sp += 1
+            # Set the PC to the address stored in the given register.
             elif ir == JMP:
                 self.pc = self.reg[operand_a]
             elif ir == CMP:
                 self.alu('CMP', operand_a, operand_b)
                 self.pc += 3
+            # If equal flag is set (true), jump to the address stored in the given register.
             elif ir == JEQ:
                 if self.fl == 0b00000001:
                     self.pc = self.reg[operand_a]
                 else:
                     self.pc += 2
+            # If E flag is clear (false, 0), jump to the address stored in the given register.
             elif ir == JNE:
                 if ((self.fl == 0b00000001) == 0):
                     self.pc = self.reg[operand_a]
